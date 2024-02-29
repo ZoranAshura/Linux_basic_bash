@@ -17,7 +17,7 @@ function systemInfo() {
     echo "RAM_FREE = $(free --mega -t | awk '/Total:/{print $4 / 1000}') GB"
     echo "SPACE_ROOT = $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $2 / 1000); print size}') MB"
     echo "SPACE_ROOT_USED = $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $3 / 1000); print size}') MB"
-    echo "SPACE_ROOT_FREE = $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $4 / 1000); print size}') MB"   
+    echo "SPACE_ROOT_FREE = $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $4 / 1000); print size}') MB"
 }
 
 function saveFile() {
@@ -29,10 +29,11 @@ function saveFile() {
     do
         read answer
         if [[ $answer =~ ^[^yY]*[yY][^yY]*$ ]]; then
-            echo ========================================= >> info.txt
-            date | awk '{print $2, $3, $4, $5}' >> info.txt
-            systemInfo >> info.txt
-            echo "Data was successful writted to the info.txt file!"
+            date1=$(date | awk '{print $2"_"$3"_"$4"_"}')
+            date2=$(date | awk '{print $5}' | awk -F: '{print $1"_"$2"_"$3}')
+            echo ========================================= > $date1$date2.status
+            systemInfo > $date1$date2.status
+            echo "Data was successful writted to the status file!"
             flag=0
         elif [[ $answer =~ ^[^nN]*[nN][^nN]*$ ]]; then
             echo "Bye! Thanks for using this script"
@@ -44,4 +45,5 @@ function saveFile() {
 }
 
 systemInfo
-saveFile    
+saveFile
+
