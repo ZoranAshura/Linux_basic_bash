@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Color variables
+# Foreground colors
 BLACK=";30"
 RED=";31"
 GREEN=";32"
@@ -8,20 +8,40 @@ BLUE=";34"
 PURPLE=";35"
 WHITE=";37"
 
-# Color variables
+# Background colors
 BG_BLACK=";40"
 BG_RED=";41"
 BG_GREEN=";42"
 BG_BLUE=";44"
 BG_PURPLE=";45"
 BG_WHITE=";47"
-clear="\033[0m"
 
+# reset to default colors
+CLEAR="\033[0m"
 
+# Core of the color formatting
 s="\033[0"
 e="m"
 
-#function takeColour() {
+function paramIsNumberInRange () {
+for INDEX in "$@"; do
+  if [[ "$INDEX" -ge 1 && "$INDEX" -le 6 ]]; then
+    continue
+  else
+echo "Error: Parameter is out of range (1-6)"
+    exit 1
+fi
+done
+}
+
+function coloursIsMatch () {
+if [ "${1}" = "${2}" ] || [ "${3}" = "${4}" ]; then
+    echo "Error: background color and font color is matched! Please try again"
+    exit 1
+fi
+}
+
+function takeColour() {
 case $1 in
     1) FN=$WHITE ;;
     2) FN=$RED ;;
@@ -57,28 +77,35 @@ case $4 in
     5) BT=$BG_PURPLE ;;
     6) BT=$BG_BLACK ;;
 esac
-#}
-
-function systemInfo() {
-    echo -e "$s$FN$BN$e HOSTNAME${clear} = $s$FT$BT$e $(ip -o link show | awk -F': ' '{print $2}' | awk '/^e/{printf "%s ", $0}')${clear}"
-    echo -e "$s$FN$BN$e TIMEZONE${clear} = $s$FT$BT$e $(timedatectl | awk -F": " '/Time/{print $2}')${clear}"
-    echo -e "$s$FN$BN$e USER${clear} = $s$FT$BT$e $(whoami)${clear}"
-    echo -e "$s$FN$BN$e OS${clear} = $s$FT$BT$e $(hostnamectl |awk '/Op/{print $3, $4, $5}')${clear}"
-    echo -e "$s$FN$BN$e DATE${clear} = $s$FT$BT$e $(date | awk '{print $2, $3, $4, $5}')${clear}"
-    echo -e "$s$FN$BN$e UPTIME${clear} = $s$FT$BT$e $(uptime | awk '{print $3}') minutes${clear}"
-    echo -e "$s$FN$BN$e UPTIME_SECv${clear} = $s$FT$BT$e $(uptime | awk '{print $3 * 60}') seconds${clear}"
-    echo -e "$s$FN$BN$e IP${clear} = $s$FT$BT$e $(ifconfig | awk '/inet /{print $2}' | awk '{printf "%s ", $0}')${clear}"
-    echo -e "$s$FN$BN$e MASK${clear} = $s$FT$BT$e $(ifconfig | awk '/netmask/{print $4}' | awk '{printf "%s ", $0}')${clear}"
-    echo -e "$s$FN$BN$e GATEWAY${clear} = $s$FT$BT$e $(ip route | awk '/default/{print $3}')${clear}"
-    echo -e "$s$FN$BN$e RAM_TOTAL${clear} = $s$FT$BT$e $(free --mega -t | awk '/Total:/{print $2 / 1000}') GB (also includes swap memory)${clear}"
-    echo -e "$s$FN$BN$e RAM_USED${clear} = $s$FT$BT$e $(free --mega -t | awk '/Total:/{print $3 / 1000}') GB${clear}"
-    echo -e "$s$FN$BN$e RAM_FREE${clear} = $s$FT$BT$e $(free --mega -t | awk '/Total:/{print $4 / 1000}') GB${clear}"
-    echo -e "$s$FN$BN$e SPACE_ROOT${clear} = $s$FT$BT$e $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $2 / 1000); print size}') MB${clear}"
-    echo -e "$s$FN$BN$e SPACE_ROOT_USED${clear} = $s$FT$BT$e $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $3 / 1000); print size}') MB${clear}"
-    echo -e "$s$FN$BN$e SPACE_ROOT_FREE${clear} = $s$FT$BT$e $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $4 / 1000); print size}') MB$(tput sgr0)${clear}"
 }
 
-#takeColour
-systemInfo
+function systemInfo() {
+    echo -e "HOSTNAME = $(ip -o link show | awk -F': ' '{print $2}' | awk '/^e/{printf "%s ", $0}')"
+    echo -e "TIMEZONE = $(timedatectl | awk -F": " '/Time/{print $2}')"
+    echo -e "USER = $(whoami)"
+    echo -e "OS = $(hostnamectl |awk '/Op/{print $3, $4, $5}')"
+    echo -e "DATE = $(date | awk '{print $2, $3, $4, $5}')"
+    echo -e "UPTIME = $(uptime | awk '{print $3}') minutes"
+    echo -e "UPTIME_SECv = $(uptime | awk '{print $3 * 60}') seconds"
+    echo -e "IP = $(ifconfig | awk '/inet /{print $2}' | awk '{printf "%s ", $0}')"
+    echo -e "MASK = $(ifconfig | awk '/netmask/{print $4}' | awk '{printf "%s ", $0}')"
+    echo -e "GATEWAY = $(ip route | awk '/default/{print $3}')"
+    echo -e "RAM_TOTAL = $(free --mega -t | awk '/Total:/{print $2 / 1000}') GB (also includes swap memory)"
+    echo -e "RAM_USED = $(free --mega -t | awk '/Total:/{print $3 / 1000}') GB"
+    echo -e "RAM_FREE = $(free --mega -t | awk '/Total:/{print $4 / 1000}') GB"
+    echo -e "SPACE_ROOT = $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $2 / 1000); print size}') MB"
+    echo -e "SPACE_ROOT_USED = $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $3 / 1000); print size}') MB"
+    echo -e "SPACE_ROOT_FREE = $(df / | sed -n '2p' | awk '{size = sprintf("%.2f", $4 / 1000); print size}') MB"
+}
 
+if [ ! $# -eq 4 ]; then
+    echo "Error: Expected 4 parameters."
+    exit 1
+fi
+
+# cat text.txt | awk '{print "\033[0;31m",  $1 "\033[0m"}'
+paramIsNumberInRange "$1" "$2" "$3" "$4"
+coloursIsMatch "$1" "$2" "$3" "$4"
+takeColour "$1" "$2" "$3" "$4"
+systemInfo | awk -v fn=$FN -v bn=$BN -v ft=$FT -v bt=$BT -v S=$s -v E=$e -v clear=$CLEAR 'BEGIN { FS = "=" } {print S fn bn E $1 "=" clear S ft bt E $2 clear}'
 
